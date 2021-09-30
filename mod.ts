@@ -1,36 +1,29 @@
-import { default as brorand, Rand } from 'https://cdn.skypack.dev/brorand'
 import { BN } from 'https://deno.land/x/bn_deno@1.0.0/lib/bn.js'
 
 export class MillerRabin {
-  rand: any
-  constructor(rand?: typeof Rand) {
-    this.rand = rand || new brorand.Rand()
-  }
-
-  static create(rand: typeof Rand) {
-    return new MillerRabin(rand)
-  }
-
-  _randbelow(n: BN) {
+  #randbelow(n: BN) {
     const len = n.bitLength()
     const min_bytes = Math.ceil(len / 8)
 
     // Generage random bytes until a number less than n is found.
     // This ensures that 0..n-1 have an equal probability of being selected.
     let a: BN
-    do a = new BN(this.rand.generate(min_bytes))
-    while (a.cmp(n) >= 0)
+    do {
+      const arr = new Uint8Array(min_bytes)
+      self.crypto.getRandomValues(arr)
+      a = new BN(arr)
+    } while (a.cmp(n) >= 0)
 
     return a
   }
 
-  _randrange(start: BN, stop: BN): BN {
+  #randrange(start: BN, stop: BN): BN {
     // Generate a random number greater than or equal to start and less than stop.
     const size = stop.sub(start)
-    return start.add(this._randbelow(size))
+    return start.add(this.#randbelow(size))
   }
 
-  test(n: BN, k: number, cb: (a: any) => void): boolean {
+  test(n: BN, k?: number, cb?: (a: any) => void): boolean {
     const len = n.bitLength()
     const red = BN.mont(n)
     const rone = new BN(1).toRed(red)
@@ -46,7 +39,7 @@ export class MillerRabin {
 
     const prime = true
     for (; k > 0; k--) {
-      const a = this._randrange(new BN(2), n1)
+      const a = this.#randrange(new BN(2), n1)
       if (cb) cb(a)
 
       let x = a.toRed(red).redPow(d)
@@ -80,7 +73,7 @@ export class MillerRabin {
     const rn1 = n1.toRed(red)
 
     for (; k > 0; k--) {
-      const a = this._randrange(new BN(2), n1)
+      const a = this.#randrange(new BN(2), n1)
 
       const g = n.gcd(a)
       if (g.cmpn(1) !== 0) return g
