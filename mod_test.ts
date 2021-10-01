@@ -1,5 +1,5 @@
 import { describe, it, expect, run } from 'https://deno.land/x/tincan@0.2.2/mod.ts'
-import { BN } from 'https://deno.land/x/bn_deno@1.0.0/lib/bn.js'
+import BN from 'https://esm.sh/bn.js'
 import { MillerRabin } from './mod.ts'
 
 describe('MillerRabin', () => {
