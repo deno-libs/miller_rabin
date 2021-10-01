@@ -1,4 +1,4 @@
-import { BN } from 'https://deno.land/x/bn_deno@1.0.0/lib/bn.js'
+import BN from 'https://esm.sh/bn.js'
 
 export class MillerRabin {
   #randbelow(n: BN) {
